@@ -2,8 +2,9 @@
 
 Projek Wrapper non-official untuk integrasi QRIS Payment Gateway.
 
-## Current Status <span style="color: red">18 June 2023</span>
-<h3 style="color: red">In-development Not Working</h3>
+## Current Status 
+- ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) **`18 June 2023`**
+- ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) **`In-development Not Working`**
 
 ## Fitur
 
