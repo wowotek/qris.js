@@ -93,12 +93,12 @@ export class QRIS {
     private __MEMO_SUCCESS_INVOICES = new Array<[string, ____Invoice]>();
 
     private _PROT_API_CALL_USE: boolean;
-    private _PROT_API_CALL_COUNT: number = 0;
+    private _PROT_API_CALL_COUNT = 0;
     private _PROT_API_CALL_LIMIT_MAX: number;
     private _PROT_API_CALL_LIMIT_WARNING: number;
     private _PROT_API_CALL_TIMEOUT: number;
-    private _PROT_API_CALL_WARNING_CALLBACK: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>);
-    private _PROT_API_CALL_MAX_CALLBACK: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>);
+    private _PROT_API_CALL_WARNING_CALLBACK: ((useCount: number, ms: number) => void) | ((useCount: number, ms: number) => Promise<void>);
+    private _PROT_API_CALL_MAX_CALLBACK: ((useCount: number, ms: number) => void) | ((useCount: number, ms: number) => Promise<void>);
 
     private _PROT_FIRST_CALL_DATE: Date | null = null;
 
@@ -115,8 +115,8 @@ export class QRIS {
         APICallProtectorLimitMax?: number,
         APICallProtectorLimitWarning?: number,
         APICallProtectorLimitTimeout?: number,
-        APICallProtectorLimitMaxCallback?: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>),
-        APICallProtectorLimitWarningCallback?: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>)
+        APICallProtectorLimitMaxCallback?: ((useCount: number, ms: number) => void) | ((useCount: number, ms: number) => Promise<void>),
+        APICallProtectorLimitWarningCallback?: ((useCount: number, ms: number) => void) | ((useCount: number, ms: number) => Promise<void>)
     }) {
         this._DEVMODE = options.devMode == undefined ? false : options.devMode;
         if(options.customHost) this._HOST = options.customHost;
@@ -131,8 +131,8 @@ export class QRIS {
         this._PROT_API_CALL_LIMIT_MAX = options.APICallProtectorLimitMax ? options.APICallProtectorLimitMax : 200;
         this._PROT_API_CALL_LIMIT_WARNING = options.APICallProtectorLimitWarning ? options.APICallProtectorLimitWarning : Math.floor(this._PROT_API_CALL_LIMIT_MAX / 1.25);
         this._PROT_API_CALL_TIMEOUT = options.APICallProtectorLimitTimeout ? options.APICallProtectorLimitTimeout : 600000 * 30;
-        this._PROT_API_CALL_MAX_CALLBACK = options.APICallProtectorLimitMaxCallback ? options.APICallProtectorLimitMaxCallback : (_: number, __: number) => {};
-        this._PROT_API_CALL_WARNING_CALLBACK = options.APICallProtectorLimitWarningCallback ? options.APICallProtectorLimitWarningCallback : (_: number, __: number) => {};
+        this._PROT_API_CALL_MAX_CALLBACK = options.APICallProtectorLimitMaxCallback ? options.APICallProtectorLimitMaxCallback : () => {return};
+        this._PROT_API_CALL_WARNING_CALLBACK = options.APICallProtectorLimitWarningCallback ? options.APICallProtectorLimitWarningCallback : () => {return};
     }
 
     public get host() { return this._HOST }
