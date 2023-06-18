@@ -68,3 +68,21 @@ Projek Wrapper non-official untuk integrasi QRIS Payment Gateway.
             console.err(err);
         });
     ```
+3. Gunakan Development mode dan gunakan [QRIS Simulator](https://github.com/wowotek/QRIS-Simulator) : [https://github.com/wowotek/QRIS-Simulator](https://github.com/wowotek/QRIS-Simulator)
+## Kontribusi
+
+silahkan kontribusi dalam bentuk apapun. ada pula beberapa
+TODO list yang terfikir untuk improve projek ini
+
+### TODOs
+- Debug Mode, verbosity and stdout/stderr information
+- Smarter API Call Protection
+- Presistent Memoization Support (mongoose, sqlite, and other db)
+- Proper Type Documentation
+- Better Type Writing
+- Proper Code Documentation
+- Better Code Writing
+- Improve this README Design
+- Write / Improve Usage Documentation
+- Smarter Promise Chaining
+- Support for await calls intead of error checking (Promise Chaining)
