@@ -2,6 +2,9 @@
 
 Projek Wrapper non-official untuk integrasi QRIS Payment Gateway.
 
+## Current Status <span style="color: red">18 June 2023</span>
+<h3 style="color: red">In-development Not Working</h3>
+
 ## Fitur
 
 1. Create QRIS Invoice
@@ -53,7 +56,7 @@ Projek Wrapper non-official untuk integrasi QRIS Payment Gateway.
     QRISClient.createInvoice("unique_transaction_id", 15_000)
         .then(createdInvoice => QRISClient.checkStatusInvoice(
                 createdInvoice.data.qris_invoiceid,
-                createdInvoice.data.request_date.split(".")[0]
+                createdInvoice.data.request_date.split(".")[0],
                 15_000
             )
             .then(invoiceStatus => {
