@@ -127,7 +127,6 @@ export class QRIS {
         this.__MEMOIZATION_TRANSACTION_ID_LIMIT = options.memoizationTransactionIdCountLimit ? options.memoizationTransactionIdCountLimit : 10000;
         this.__MEMOIZATION_SUCCESS_INVOICES_LIMIT = options.memoizationSuccessInvoiceLimit ? options.memoizationSuccessInvoiceLimit : 10000;
 
-
         this._PROT_API_CALL_USE = options.useAPICallProtector == undefined ? true : options.useAPICallProtector
         this._PROT_API_CALL_LIMIT_MAX = options.APICallProtectorLimitMax ? options.APICallProtectorLimitMax : 200;
         this._PROT_API_CALL_LIMIT_WARNING = options.APICallProtectorLimitWarning ? options.APICallProtectorLimitWarning : Math.floor(this._PROT_API_CALL_LIMIT_MAX / 1.25);
@@ -176,7 +175,8 @@ export class QRIS {
         const date = new Date();
         date.setSeconds(date.getSeconds() - 30);
         this.__MEMO_TRANSACTION_ID.push([transactionId, date]);
-
+        
+        if(this.__MEMOIZATION_TRANSACTION_ID_LIMIT < 0) return;
         if(this.__MEMO_TRANSACTION_ID.length >= this.__MEMOIZATION_TRANSACTION_ID_LIMIT) {
             this.__MEMO_TRANSACTION_ID.shift()
         }
@@ -212,6 +212,7 @@ export class QRIS {
         )
         this.__MEMO_SUCCESS_INVOICES.push([invoiceId, inv]);
 
+        if(this.__MEMOIZATION_SUCCESS_INVOICES_LIMIT < 0) return;
         if(this.__MEMO_SUCCESS_INVOICES.length >= this.__MEMOIZATION_SUCCESS_INVOICES_LIMIT) {
             this.__MEMO_SUCCESS_INVOICES.shift()
         }
