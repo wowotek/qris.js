@@ -8,6 +8,7 @@ Projek Wrapper non-official untuk integrasi QRIS Payment Gateway.
 
 ## Fitur
 
+0. Terintegrasi dengan baik dengan [QRIS Simulator](https://github.com/wowotek/QRIS-Simulator)
 1. Create QRIS Invoice
     - Membuat invoice sesuai dengan dokumentasi official
     yang diberikan QRIS
