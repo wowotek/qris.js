@@ -30,21 +30,12 @@ export interface QRISResponseFailed {
 type Y = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
 type M30 = `0${Exclude<Y, "0">}` | `1${Y}` | `2${Y}` | `30`;
 type M31 = `0${Exclude<Y, "0">}` | `1${Y}` | `2${Y}` | `30` | `31`;
-type JAN = `01-${M31}`;
 type FEB = `02-${`0${Exclude<Y, "0">}` | `1${Y}` | `2${Y}`}`;
-type MAR = `03-${M31}`;
-type APR = `04-${M30}`;
-type MAY = `05-${M31}`;
-type JUN = `06-${M30}`;
-type JUL = `07-${M31}`;
-type AGU = `08-${M31}`;
-type SEP = `09-${M30}`;
-type OCT = `10-${M31}`;
-type NOV = `11-${M30}`;
-type DES = `12-${M31}`;
+type M30s = `${`04` | `06` | `09` | `11`}-${M30}`;
+type M31s = `${`01` | `03` | `05` | `07` | `08` | `10` | `12`}-${M31}`;
 type YR = Exclude<Exclude<`2${0 | 1}${Y}${Y}`, `200${Y}`>, `201${Y}`>
-type MMDD = JAN | FEB | MAR | APR | MAY | JUN | JUL | AGU | SEP | OCT | NOV | DES;
-export type YYYY_MM_DD = `${YR}-${MMDD}`
+type MMDD =  M31s | M30s| FEB;
+export type YYYY_MM_DD = `2019-12-31` | `${YR}-${MMDD}`;
 
 class ____Invoice {
     private _invoiceId: string;
@@ -106,8 +97,10 @@ export class QRIS {
     private _PROT_API_CALL_LIMIT_MAX: number;
     private _PROT_API_CALL_LIMIT_WARNING: number;
     private _PROT_API_CALL_TIMEOUT: number;
-    private _PROT_API_CALL_WARNING_CALLBACK: ((useCount: number) => any) | ((useCount: number) => Promise<any>);
-    private _PROT_API_CALL_MAX_CALLBACK: ((useCount: number) => any) | ((useCount: number) => Promise<any>);
+    private _PROT_API_CALL_WARNING_CALLBACK: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>);
+    private _PROT_API_CALL_MAX_CALLBACK: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>);
+
+    private _PROT_FIRST_CALL_DATE: Date | null = null;
 
     public constructor(options: {
         apikey: string,
@@ -122,10 +115,10 @@ export class QRIS {
         APICallProtectorLimitMax?: number,
         APICallProtectorLimitWarning?: number,
         APICallProtectorLimitTimeout?: number,
-        APICallProtectorLimitMaxCallback?: ((useCount: number) => any) | ((useCount: number) => Promise<any>),
-        APICallProtectorLimitWarningCallback?: ((useCount: number) => any) | ((useCount: number) => Promise<any>)
+        APICallProtectorLimitMaxCallback?: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>),
+        APICallProtectorLimitWarningCallback?: ((useCount: number, ms: number) => any) | ((useCount: number, ms: number) => Promise<any>)
     }) {
-        this._DEVMODE = options.devMode == undefined ? true : options.devMode;
+        this._DEVMODE = options.devMode == undefined ? false : options.devMode;
         if(options.customHost) this._HOST = options.customHost;
         else this._HOST = this._DEVMODE ? "http://localhost:8080" : "https://qris.id"
         this._API_KEY = options.apikey;
@@ -139,8 +132,8 @@ export class QRIS {
         this._PROT_API_CALL_LIMIT_MAX = options.APICallProtectorLimitMax ? options.APICallProtectorLimitMax : 200;
         this._PROT_API_CALL_LIMIT_WARNING = options.APICallProtectorLimitWarning ? options.APICallProtectorLimitWarning : Math.floor(this._PROT_API_CALL_LIMIT_MAX / 1.25);
         this._PROT_API_CALL_TIMEOUT = options.APICallProtectorLimitTimeout ? options.APICallProtectorLimitTimeout : 600000 * 30;
-        this._PROT_API_CALL_MAX_CALLBACK = options.APICallProtectorLimitMaxCallback ? options.APICallProtectorLimitMaxCallback : (_: number) => {};
-        this._PROT_API_CALL_WARNING_CALLBACK = options.APICallProtectorLimitWarningCallback ? options.APICallProtectorLimitWarningCallback : (_: number) => {};
+        this._PROT_API_CALL_MAX_CALLBACK = options.APICallProtectorLimitMaxCallback ? options.APICallProtectorLimitMaxCallback : (_: number, __: number) => {};
+        this._PROT_API_CALL_WARNING_CALLBACK = options.APICallProtectorLimitWarningCallback ? options.APICallProtectorLimitWarningCallback : (_: number, __: number) => {};
     }
 
     public get host() { return this._HOST }
@@ -149,14 +142,26 @@ export class QRIS {
 
     private async APICallIsAllowed() {
         if(!this._PROT_API_CALL_USE) return true;
+        if(this._PROT_FIRST_CALL_DATE == null) {
+            this._PROT_FIRST_CALL_DATE = new Date();
+            return true;
+        }
+
+        const cd = new Date().getTime();
+        const sv = this._PROT_FIRST_CALL_DATE.getTime()
+        if(cd - sv >= this._PROT_API_CALL_TIMEOUT) {
+            this._PROT_FIRST_CALL_DATE = new Date();
+            this._PROT_API_CALL_COUNT = 0;
+            return true;
+        }
 
         let isAllowed = true;
         if(this._PROT_API_CALL_COUNT >= this._PROT_API_CALL_LIMIT_WARNING && this._PROT_API_CALL_COUNT < this._PROT_API_CALL_LIMIT_MAX){
-            this._PROT_API_CALL_WARNING_CALLBACK(this._PROT_API_CALL_COUNT);
+            this._PROT_API_CALL_WARNING_CALLBACK(this._PROT_API_CALL_COUNT, cd - sv);
         }
         
         if(this._PROT_API_CALL_COUNT >= this._PROT_API_CALL_LIMIT_MAX) {
-            this._PROT_API_CALL_MAX_CALLBACK(this._PROT_API_CALL_COUNT);
+            this._PROT_API_CALL_MAX_CALLBACK(this._PROT_API_CALL_COUNT, cd - sv);
             isAllowed = false;
         }
 
@@ -222,7 +227,7 @@ export class QRIS {
         return null;
     }
     
-    public async QRISCreateInvoice(
+    public async createInvoice(
         transactionId: string,
         billedAmount: number
     ) {
@@ -282,7 +287,7 @@ export class QRIS {
         throw res as QRISResponseFailed
     }
     
-    public async QRISCheckStatusInvoice(
+    public async checkStatusInvoice(
         QRISInvoiceId: string,
         QRISRequestDate: Date | YYYY_MM_DD,
         billedAmount: number,
